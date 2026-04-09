@@ -1,0 +1,24 @@
+# CMake build directories
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# misc
+*.su
+compile_commands.json
+
+# Compiled output
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+
+# STM32CubeIDE stuff... i use CLion instead but im just adding these
+# in case someone contribs to it through CubeIDE
+.cproject
+.project
+.settings/
