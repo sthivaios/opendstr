@@ -1,0 +1,16 @@
+# Any references to "the project", refer to OpenDSTR.
+# This project contains multiple components under different licenses:
+
+## Firmware (/firmware)
+Apache License 2.0
+Copyright (c) 2026 Stratos Thivaios
+
+## Hardware & Enclosure (/hardware, /enclosure)
+CERN Open Hardware Licence Version 2 - Strongly Reciprocal (CERN-OHL-S)
+Copyright (c) 2026 Stratos Thivaios
+
+## Documentation & Assets (/docs, /assets)
+Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+Copyright (c) 2026 Stratos Thivaios
+
+See the LICENSE file under each directory, for the complete license terms.
