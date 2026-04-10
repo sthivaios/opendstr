@@ -109,17 +109,14 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
   uint32_t last_count = 0;
+
+  // ReSharper disable once CppDFAEndlessLoop
   while (1)
   {
-    int32_t count = (int16_t)TIM4->CNT;
-    if (count != last_count) {
-      last_count = count;
-      char buf[64];
-      sprintf(buf, "encoder value: %d\r\n", count);
-      HAL_UART_Transmit(&huart2, (uint8_t*)buf, strlen(buf), HAL_MAX_DELAY);
-  }
+    state_machine_update();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
