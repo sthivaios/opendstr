@@ -55,17 +55,13 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+extern UART_HandleTypeDef huart2;
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
 #define B1_EXTI_IRQn EXTI15_10_IRQn
-#define USART_TX_Pin GPIO_PIN_2
-#define USART_TX_GPIO_Port GPIOA
-#define USART_RX_Pin GPIO_PIN_3
-#define USART_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
 #define START_STOP_BTN_Pin GPIO_PIN_8
@@ -87,12 +83,11 @@ void Error_Handler(void);
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
-#define ENCODER_CLK_Pin GPIO_PIN_5
-#define ENCODER_CLK_GPIO_Port GPIOB
-#define ENCODER_CLK_EXTI_IRQn EXTI9_5_IRQn
-#define ENCODER_SW_Pin GPIO_PIN_6
+#define ENCODER_SW_Pin GPIO_PIN_5
 #define ENCODER_SW_GPIO_Port GPIOB
 #define ENCODER_SW_EXTI_IRQn EXTI9_5_IRQn
+#define ENCODER_CLK_Pin GPIO_PIN_6
+#define ENCODER_CLK_GPIO_Port GPIOB
 #define ENCODER_DT_Pin GPIO_PIN_7
 #define ENCODER_DT_GPIO_Port GPIOB
 
