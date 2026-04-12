@@ -31,10 +31,10 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "../../App/Inc/sys_state_machine.h"
+#include "stm32f4xx_hal.h"
 #include <stdio.h>
 #include <string.h>
-#include "stm32f4xx_hal.h"
-#include "../../App/Inc/state_machine.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

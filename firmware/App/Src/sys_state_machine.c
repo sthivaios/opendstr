@@ -1,4 +1,4 @@
-#include "../Inc/state_machine.h"
+#include "../Inc/sys_state_machine.h"
 
 // main system state
 static volatile SystemState_t SystemState = SYS_IDLE;
