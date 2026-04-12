@@ -110,13 +110,15 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   HAL_TIM_Base_Start_IT(&htim1);
+  __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_CC1);
+  __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_CC2);
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
-  uint32_t last_count = 0;
 
   // ReSharper disable once CppDFAEndlessLoop
   while (1)
   {
-    state_machine_update();
+    sys_state_machine_update_state();
+    sys_state_machine_take_action();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -328,11 +330,11 @@ static void MX_TIM4_Init(void)
   sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 10;
+  sConfig.IC1Filter = 15;
   sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 10;
+  sConfig.IC2Filter = 15;
   if (HAL_TIM_Encoder_Init(&htim4, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -424,8 +426,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ENCODER_SW_Pin */
   GPIO_InitStruct.Pin = ENCODER_SW_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(ENCODER_SW_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/

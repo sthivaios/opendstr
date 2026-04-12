@@ -1,0 +1,4 @@
+#ifndef OPENDSTR_GPIO_H
+#define OPENDSTR_GPIO_H
+
+#endif //OPENDSTR_GPIO_H
