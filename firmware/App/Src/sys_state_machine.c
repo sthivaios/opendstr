@@ -22,6 +22,9 @@ static volatile uint32_t last_fire_time = 0;
 static volatile uint32_t last_button_press_time = 0;
 // whether the run/stop button is being held down at the moment
 static volatile bool sys_button_is_being_held_down = false;
+// encoder stuff
+static uint16_t last_encoder_cnt = 0;
+uint16_t current_cnt = 0;
 
 // ReSharper disable once CppParameterMayBeConstPtrOrRef - clion thing to shut up the warning
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
@@ -103,6 +106,20 @@ void sys_state_machine_take_action(void) {
         shutter_request_flag = false;
         buzzer_play_tone_for_duration(999, 99, 30, 150, TIM8);
         shutter_fire();
+      }
+      current_cnt = TIM4->CNT;
+      if (current_cnt != last_encoder_cnt) {
+        int16_t diff = (int16_t)(current_cnt - last_encoder_cnt);
+        if (diff > 0) {
+          buzzer_play_tone_for_duration(999, 99, 30, 100, TIM8);
+          user_interval += 100;
+        } else {
+          if (user_interval > 100) {
+            user_interval -= 100;
+            buzzer_play_tone_for_duration(999, 49, 30, 100, TIM8);
+          }
+          last_encoder_cnt = current_cnt;
+        }
       }
       break;
   }
