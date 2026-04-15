@@ -118,6 +118,8 @@ int main(void)
   uint32_t val = RCC->CFGR & RCC_CFGR_SWS;
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
 
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+
   // ReSharper disable once CppDFAEndlessLoop
   while (1)
   {
@@ -269,6 +271,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 0 */
 
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
 
@@ -281,6 +284,15 @@ static void MX_TIM3_Init(void)
   htim3.Init.Period = 499;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
   if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
@@ -421,6 +433,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : RUN_STOP_BTN_Pin */
+  GPIO_InitStruct.Pin = RUN_STOP_BTN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(RUN_STOP_BTN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : MANUAL_SHUTTER_BTN_Pin DISPLAY_BTN_Pin */
   GPIO_InitStruct.Pin = MANUAL_SHUTTER_BTN_Pin|DISPLAY_BTN_Pin;

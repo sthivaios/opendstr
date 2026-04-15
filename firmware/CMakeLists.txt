@@ -48,6 +48,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/Src/sys_state_machine.c
     App/Src/shutter.c
     App/Src/gpio.c
+    App/Src/buzzer.c
 )
 
 # Add include paths
