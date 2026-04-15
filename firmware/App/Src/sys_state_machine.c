@@ -9,7 +9,7 @@ static volatile SystemState_t SystemState = SYS_IDLE;
 static volatile uint32_t ticks = 0;
 
 // interval between shutter fires
-static uint32_t user_interval = 1000;
+static uint32_t user_interval = 3000;
 // last request to change the state of the state machine - used for debugging the button by checking how much time has passed
 static volatile uint32_t last_request_time = 0;
 // incremented every time TIM1 ticks, then added by the state machine to the ticks variable
