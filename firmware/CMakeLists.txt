@@ -46,15 +46,19 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     App/Src/sys_state_machine.c
+    App/Src/ui_state_machine.c
     App/Src/shutter.c
     App/Src/gpio.c
     App/Src/buzzer.c
+    Drivers/ssd1306/ssd1306.c
+    Drivers/ssd1306/ssd1306_fonts.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     App/Src
+    Drivers/ssd1306
 )
 
 # Add project symbols (macros)

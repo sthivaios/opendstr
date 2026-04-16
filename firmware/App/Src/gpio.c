@@ -11,7 +11,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     } else {
       sys_update_button_is_being_held_down(false);
     }
-  } else {
-    __NOP();
+  } else if (GPIO_Pin == MANUAL_SHUTTER_BTN_Pin) {
+    sys_request_shutter_to_fire();
   }
 }

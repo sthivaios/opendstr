@@ -1,4 +1,5 @@
 #include "../Inc/sys_state_machine.h"
+#include "../Inc/ui_state_machine.h"
 
 #define SW_DEBOUNCING_DELAY_MS 1000
 #define SW_MINIMUM_PRESS_DURATION_MS 500
@@ -25,6 +26,10 @@ static volatile bool sys_button_is_being_held_down = false;
 // encoder stuff
 static uint16_t last_encoder_cnt = 0;
 uint16_t current_cnt = 0;
+// shots fired
+static volatile int shots_fired = 0;
+static volatile int total_shots = 50;
+
 
 // ReSharper disable once CppParameterMayBeConstPtrOrRef - clion thing to shut up the warning
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
@@ -55,6 +60,10 @@ void sys_update_button_is_being_held_down(const bool state) {
   }
 }
 
+void sys_request_shutter_to_fire(void) {
+  shutter_request_flag = true;
+}
+
 void sys_state_machine_update_state(void) {
 
   // handle timing
@@ -71,6 +80,7 @@ void sys_state_machine_update_state(void) {
           sys_reset_last_state_change_request_time();
           sys_update_last_button_press_time();
           HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
+          display_shots(shots_fired, total_shots);
           buzzer_play_tone_for_duration(13, 2550, 50, 1000, TIM8);
           SystemState = SYS_RUNNING;
         }
@@ -90,6 +100,8 @@ void sys_state_machine_update_state(void) {
           sys_reset_last_fire_time();
           sys_reset_last_state_change_request_time();
           sys_update_last_button_press_time();
+          splash_display();
+          shots_fired = 0;
           buzzer_play_tone_for_duration(999, 124, 50, 1000, TIM8);
         }
       }
@@ -100,12 +112,19 @@ void sys_state_machine_update_state(void) {
 void sys_state_machine_take_action(void) {
   switch (SystemState) {
     case SYS_IDLE:
+      if (shutter_request_flag) {
+        shutter_request_flag = false;
+        buzzer_play_tone_for_duration(999, 99, 30, 150, TIM8);
+        shutter_fire();
+      }
       break;
     case SYS_RUNNING:
       if (shutter_request_flag) {
         shutter_request_flag = false;
         buzzer_play_tone_for_duration(999, 99, 30, 150, TIM8);
         shutter_fire();
+        shots_fired++;
+        display_shots(shots_fired, total_shots);
       }
       current_cnt = TIM4->CNT;
       if (current_cnt != last_encoder_cnt) {
