@@ -24,7 +24,8 @@ static volatile bool sys_button_is_being_held_down = false;
 // shots fired
 static volatile int shots_fired = 0;
 static volatile int number_of_shots_to_take = 5;
-static volatile int16_t time_remaining_until_shot = 0;
+static volatile uint32_t time_remaining_until_shot = 0;
+static volatile bool muted = false;
 
 // predefined beep tones:
 
@@ -76,9 +77,12 @@ int sys_get_number_of_shots_fired(void) { return shots_fired; }
 void sys_set_number_of_shots_to_take(const int number_of_shots) {
   number_of_shots_to_take = number_of_shots;
 }
-int16_t sys_get_time_remaining_until_shot(void) {
+uint32_t sys_get_time_remaining_until_shot(void) {
   return time_remaining_until_shot;
 }
+
+bool sys_get_muted(void) { return muted; }
+void sys_set_muted(const bool state) { muted = state; }
 
 // requests a shutter fire from the state machine by setting the
 // "shutter_request_flag" to true
@@ -119,8 +123,10 @@ void sys_state_machine_update_state(void) {
         HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 #endif
         // play tone through the buzzer to indicate that the state has changed
-        buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Run_State_Beep,
+        if (!muted) {
+          buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Run_State_Beep,
                                       TIM8);
+        }
 
         // set state machine state to SYS_RUNNING
         SystemState = SYS_RUNNING;
@@ -163,8 +169,10 @@ void sys_state_machine_update_state(void) {
         shots_fired = 0;
 
         // play tone through the buzzer to indicate that the state has changed
-        buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
+        if (!muted) {
+          buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
                                       TIM8);
+        }
 
         // set state machine state to SYS_IDLE
         SystemState = SYS_IDLE;
@@ -173,8 +181,10 @@ void sys_state_machine_update_state(void) {
     if (number_of_shots_to_take - shots_fired <= 0) {
       shutter_request_flag = false;
       shots_fired = 0;
-      buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
+      if (!muted) {
+        buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
                                       TIM8);
+      }
       SystemState = SYS_IDLE;
     }
     break;
@@ -183,7 +193,9 @@ void sys_state_machine_update_state(void) {
 
 void call_shutter_fire_and_clear_flags_and_beep(void) {
   shutter_request_flag = false;
-  buzzer_play_tone_for_duration(Sys_State_Machine_Shutter_Fired_Beep, TIM8);
+  if (!muted) {
+    buzzer_play_tone_for_duration(Sys_State_Machine_Shutter_Fired_Beep, TIM8);
+  }
   shutter_begin_fire();
 }
 
@@ -211,5 +223,5 @@ void sys_state_machine_take_action(void) {
   // used for buzzer timekeeping, if it's time to stop a beep, it will stop the
   // beep
   buzzer_check_and_end_beep(TIM8);
-  shutter_end_fire();
+  shutter_end_fire(TIME_TO_HOLD_SHUTTER_IN_MS);
 }

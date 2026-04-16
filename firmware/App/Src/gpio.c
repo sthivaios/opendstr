@@ -21,5 +21,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     } else {
       ui_state_machine_set_encoder_sw_is_being_held_down(false);
     }
+  } else if (GPIO_Pin == BULB_MODE_BTN_Pin) {
+    if (((GPIOA->IDR >> 9) & 0x1) == 0) {
+      if (!ui_state_machine_get_bulb_mode_is_being_held_down()) {
+        ui_state_machine_update_timestamp_when_bulb_mode_was_held_down();
+        ui_state_machine_set_bulb_mode_is_being_held_down(true);
+      }
+    } else {
+      ui_state_machine_set_bulb_mode_is_being_held_down(false);
+    }
   }
 }

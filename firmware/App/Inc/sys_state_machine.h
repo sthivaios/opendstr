@@ -14,6 +14,7 @@
 // defines
 #define SW_DEBOUNCING_DELAY_MS 1000
 #define SW_MINIMUM_PRESS_DURATION_MS 500
+#define TIME_TO_HOLD_SHUTTER_IN_MS 500 // this is how long it basically holds the shutter
 
 // typedef
 typedef enum {
@@ -34,6 +35,8 @@ void sys_set_user_interval_between_shots(uint32_t interval);
 int sys_get_number_of_shots_to_take(void);
 void sys_set_number_of_shots_to_take(int number_of_shots);
 int sys_get_number_of_shots_fired(void);
-int16_t sys_get_time_remaining_until_shot(void);
+uint32_t sys_get_time_remaining_until_shot(void);
+bool sys_get_muted(void);
+void sys_set_muted(bool state);
 
 #endif //OPENDSTR_STATE_MACHINE_H

@@ -113,8 +113,9 @@ int main(void)
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
   // display_splash_screen();
 
-  display_splash_screen();
-  HAL_Delay(1500);
+  // display_splash_screen();
+  // HAL_Delay(1500);
+  ssd1306_Init();
   render_ui();
 
 
@@ -455,22 +456,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : RUN_STOP_BTN_Pin */
-  GPIO_InitStruct.Pin = RUN_STOP_BTN_Pin;
+  /*Configure GPIO pins : RUN_STOP_BTN_Pin BULB_MODE_BTN_Pin */
+  GPIO_InitStruct.Pin = RUN_STOP_BTN_Pin|BULB_MODE_BTN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(RUN_STOP_BTN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : MANUAL_SHUTTER_BTN_Pin DISPLAY_BTN_Pin */
-  GPIO_InitStruct.Pin = MANUAL_SHUTTER_BTN_Pin|DISPLAY_BTN_Pin;
+  /*Configure GPIO pin : DISPLAY_BTN_Pin */
+  GPIO_InitStruct.Pin = DISPLAY_BTN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(DISPLAY_BTN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : ENCODER_SW_Pin */
   GPIO_InitStruct.Pin = ENCODER_SW_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(ENCODER_SW_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
