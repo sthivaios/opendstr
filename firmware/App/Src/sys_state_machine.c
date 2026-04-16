@@ -1,5 +1,7 @@
 #include "../Inc/sys_state_machine.h"
 
+#include "../Inc/ui_state_machine.h"
+
 // main system state
 static volatile SystemState_t SystemState = SYS_IDLE;
 // TIM1 tick counter - TIM1 ticks every 1ms
@@ -7,6 +9,10 @@ static volatile uint32_t ticks = 0;
 
 // interval between shutter fires
 static uint32_t user_interval = 5000;
+// bulb_mode duration
+static volatile uint32_t bulb_mode_duration_ms = 10000;
+static volatile uint32_t timestamp_when_bulb_mode_started = 0;
+static bool bulb_mode_has_fired = false;
 // last request to change the state of the state machine - used for debugging
 // the button by checking how much time has passed
 static volatile uint32_t last_request_time = 0;
@@ -84,6 +90,13 @@ uint32_t sys_get_time_remaining_until_shot(void) {
 bool sys_get_muted(void) { return muted; }
 void sys_set_muted(const bool state) { muted = state; }
 
+uint32_t sys_get_bulb_mode_duration(void) {
+  return bulb_mode_duration_ms;
+}
+void sys_set_bulb_mode_duration(const uint32_t duration_ms) {
+  bulb_mode_duration_ms = duration_ms;
+}
+
 // requests a shutter fire from the state machine by setting the
 // "shutter_request_flag" to true
 void sys_request_shutter_to_fire(void) { shutter_request_flag = true; }
@@ -140,11 +153,6 @@ void sys_state_machine_update_state(void) {
   case SYS_RUNNING:
     // if the user_interval (interval between shutter fires) has passed, then
     // fire the shutter by setting the flag
-    if ((ticks - last_fire_time) >= user_interval) {
-      sys_update_last_fire_time();
-      shutter_request_flag = true;
-    }
-
     // if the run/stop button is being held down, and at LEAST the value of
     // "SW_DEBOUNCING_DELAY_MS" has passed since the last button stop
     if (sys_button_is_being_held_down &&
@@ -168,6 +176,10 @@ void sys_state_machine_update_state(void) {
         // clear the shots_fired variable (reset to 0)
         shots_fired = 0;
 
+        if (ui_state_machine_get_bulb_mode_status()) {
+          shutter_open();
+        }
+
         // play tone through the buzzer to indicate that the state has changed
         if (!muted) {
           buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
@@ -177,15 +189,28 @@ void sys_state_machine_update_state(void) {
         // set state machine state to SYS_IDLE
         SystemState = SYS_IDLE;
       }
-    }
-    if (number_of_shots_to_take - shots_fired <= 0) {
-      shutter_request_flag = false;
-      shots_fired = 0;
-      if (!muted) {
-        buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
-                                      TIM8);
+        }
+    if (!ui_state_machine_get_bulb_mode_status()) {
+
+      if ((ticks - last_fire_time) >= user_interval) {
+        sys_update_last_fire_time();
+        shutter_request_flag = true;
       }
-      SystemState = SYS_IDLE;
+
+      if (number_of_shots_to_take - shots_fired <= 0) {
+        shutter_request_flag = false;
+        shots_fired = 0;
+        if (!muted) {
+          buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
+                                        TIM8);
+        }
+        SystemState = SYS_IDLE;
+      }
+    } else {
+      if (!bulb_mode_has_fired) {
+        SystemState = SYS_RUNNING;
+        shutter_request_flag = true;
+      }
     }
     break;
   }
@@ -196,32 +221,58 @@ void call_shutter_fire_and_clear_flags_and_beep(void) {
   if (!muted) {
     buzzer_play_tone_for_duration(Sys_State_Machine_Shutter_Fired_Beep, TIM8);
   }
-  shutter_begin_fire();
+  shutter_begin_fire(TIME_TO_HOLD_SHUTTER_IN_MS);
 }
 
 void sys_state_machine_take_action(void) {
   switch (SystemState) {
   case SYS_IDLE:
     if (shutter_request_flag) {
-      call_shutter_fire_and_clear_flags_and_beep();
+      if (ui_state_machine_get_bulb_mode_status() == false) {
+        call_shutter_fire_and_clear_flags_and_beep();
+      } else {
+        shutter_request_flag = false;
+        timestamp_when_bulb_mode_started = ticks;
+        shutter_close();
+      }
     }
     break;
   case SYS_RUNNING:
-    if (shutter_request_flag) {
-      call_shutter_fire_and_clear_flags_and_beep();
-      // increment shots_fired var
-      shots_fired++;
-    }
-    uint32_t time_elapsed_since_last_shot = ticks - last_fire_time;
-    if (user_interval > time_elapsed_since_last_shot) {
-      time_remaining_until_shot = user_interval - time_elapsed_since_last_shot;
+    if (!ui_state_machine_get_bulb_mode_status()) {
+      if (shutter_request_flag) {
+        call_shutter_fire_and_clear_flags_and_beep();
+        // increment shots_fired var
+        shots_fired++;
+      }
     } else {
-      time_remaining_until_shot = 0;
+      if (!bulb_mode_has_fired) {
+        shutter_request_flag = false;
+        shutter_begin_fire(bulb_mode_duration_ms);
+        timestamp_when_bulb_mode_started = ticks;
+        bulb_mode_has_fired = true;
+      }
+    }
+    if (!ui_state_machine_get_bulb_mode_status()) {
+      uint32_t time_elapsed_since_last_shot = ticks - last_fire_time;
+      if (user_interval > time_elapsed_since_last_shot) {
+        time_remaining_until_shot = user_interval - time_elapsed_since_last_shot;
+      } else {
+        time_remaining_until_shot = 0;
+      }
+    } else {
+      time_remaining_until_shot = bulb_mode_duration_ms - (ticks - timestamp_when_bulb_mode_started);
+      if (ticks - timestamp_when_bulb_mode_started > bulb_mode_duration_ms) {
+        bulb_mode_has_fired = false;
+        shutter_open();
+        buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
+                                        TIM8);
+        SystemState = SYS_IDLE;
+      }
     }
     break;
   }
   // used for buzzer timekeeping, if it's time to stop a beep, it will stop the
   // beep
   buzzer_check_and_end_beep(TIM8);
-  shutter_end_fire(TIME_TO_HOLD_SHUTTER_IN_MS);
+  shutter_end_fire();
 }

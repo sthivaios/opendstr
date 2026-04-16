@@ -38,5 +38,7 @@ int sys_get_number_of_shots_fired(void);
 uint32_t sys_get_time_remaining_until_shot(void);
 bool sys_get_muted(void);
 void sys_set_muted(bool state);
+uint32_t sys_get_bulb_mode_duration(void);
+void sys_set_bulb_mode_duration(uint32_t duration_ms);
 
 #endif //OPENDSTR_STATE_MACHINE_H

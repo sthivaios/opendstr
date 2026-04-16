@@ -4,7 +4,9 @@
 #include "stm32f4xx_hal.h"
 
 // function definitions
-void shutter_begin_fire(void);
-void shutter_end_fire(int16_t shutter_time_to_hold_ms);
+void shutter_begin_fire(uint32_t shutter_time_to_hold);
+void shutter_end_fire(void);
+void shutter_close(void);
+void shutter_open(void);
 
 #endif //OPENDSTR_SHUTTER_H

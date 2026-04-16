@@ -17,6 +17,7 @@ void ui_state_machine_set_bulb_mode_is_being_held_down(bool state);
 bool ui_state_machine_get_bulb_mode_is_being_held_down(void);
 void ui_state_machine_update_timestamp_when_bulb_mode_press_was_registered(void);
 void ui_state_machine_update_timestamp_when_bulb_mode_was_held_down(void);
+bool ui_state_machine_get_bulb_mode_status(void);
 
 typedef enum {
   UI_SETTING_INTERVAL = 0,

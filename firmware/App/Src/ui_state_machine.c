@@ -22,7 +22,11 @@ static volatile bool bulb_mode_is_being_held_down = false;
 static volatile uint32_t timestamp_when_bulb_mode_was_held_down = 0;
 static volatile uint32_t timestamp_when_last_bulb_mode_press_was_registered = 0;
 
-static bool bulb_mode = true;
+static bool bulb_mode = false;
+
+bool ui_state_machine_get_bulb_mode_status() {
+  return bulb_mode;
+}
 
 bool ui_state_machine_get_bulb_mode_is_being_held_down(void) {
   return bulb_mode_is_being_held_down;
@@ -204,7 +208,7 @@ void render_ui(void) {
       ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen(buffer) * 11) - HORIZONTAL_PADDING),((SSD1306_HEIGHT - 18) / 2) + 1);
       ssd1306_WriteString(buffer, Font_11x18, White);
     } else {
-      convert_milliseconds_to_hr_string(sys_get_user_interval_between_shots(), buffer);
+      convert_milliseconds_to_hr_string(sys_get_bulb_mode_duration(), buffer);
       ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen(buffer) * 11) - HORIZONTAL_PADDING),((SSD1306_HEIGHT - 18) / 2) + 1);
       ssd1306_WriteString(buffer, Font_11x18, White);
     }
@@ -261,8 +265,8 @@ void ui_state_machine_update(void) {
           sys_set_muted(!sys_get_muted());
         }
       } else {
-        const int32_t new_interval = (int32_t)sys_get_user_interval_between_shots() + (delta * 1000);
-        sys_set_user_interval_between_shots(new_interval >= 1000 ? (uint32_t)new_interval : 1000);
+        const int32_t new_interval = (int32_t)sys_get_bulb_mode_duration() + (delta * 1000);
+        sys_set_bulb_mode_duration(new_interval >= 1000 ? (uint32_t)new_interval : 1000);
       }
       break;
     }
