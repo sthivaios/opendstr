@@ -42,12 +42,12 @@ void display_shots(const int shutter_fires, const int total_shots) {
 
 void display_splash_screen(void) {
   ssd1306_Init();
-  buzzer_play_tone_for_duration(Boot_Beep_2, TIM8);
+  // buzzer_play_tone_for_duration(Boot_Beep_2, TIM8);
   ssd1306_Fill(Black);
-  ssd1306_SetCursor((SSD1306_WIDTH - ((strlen("OpenDSTR")) * 11)) / 2, (SSD1306_HEIGHT - 18) /2 - 12);
+  ssd1306_SetCursor((SSD1306_WIDTH - ((strlen("OpenDSTR")) * 11)) / 2, (SSD1306_HEIGHT - 18) /2 - 10);
   ssd1306_WriteString("OpenDSTR", Font_11x18, White);
-  ssd1306_SetCursor((SSD1306_WIDTH - ((strlen("Idle")) * 11)) / 2, ((SSD1306_HEIGHT - 18) /2) + 12);
-  ssd1306_WriteString("Idle", Font_11x18, White);
+  ssd1306_SetCursor((SSD1306_WIDTH - ((strlen("v0.1.0 Alpha")) * 7)) / 2, ((SSD1306_HEIGHT - 10) /2) + 10);
+  ssd1306_WriteString("v0.1.0 Alpha", Font_7x10, White);
   ssd1306_UpdateScreen();
 }
 
@@ -68,3 +68,4 @@ void render_ui(void) {
   ssd1306_DrawRectangle(HORIZONTAL_PADDING - 3, (2 + ((UISetting) * 23)), SSD1306_WIDTH - HORIZONTAL_PADDING, (2 + ((UISetting + 1) * 23)), White);
   ssd1306_UpdateScreen();
 }
+
