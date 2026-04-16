@@ -69,6 +69,10 @@ void sys_update_button_is_being_held_down(const bool state) {
 // "shutter_request_flag" to true
 void sys_request_shutter_to_fire(void) { shutter_request_flag = true; }
 
+SystemState_t sys_get_state_machine_state(void) {
+  return SystemState;
+}
+
 // updates the variables and state of the state machine based on the current
 // state of variables and flags
 void sys_state_machine_update_state(void) {

@@ -6,6 +6,9 @@
 #include <string.h>
 
 static volatile UISetting_t UISetting = 1;
+static volatile UIState_t UIState = 0;
+
+static volatile uint32_t last_encoder_value = 0;
 
 static const unsigned char epd_bitmap_clock [] = {
   // 'clock-4, 18x18px
@@ -55,7 +58,8 @@ void render_ui(void) {
 #define HORIZONTAL_PADDING 8
 #define VERTICAL_GAP 4
 
-  ssd1306_Init();
+  const SystemState_t sys_state = sys_get_state_machine_state();
+
   ssd1306_Fill(Black);
   ssd1306_DrawBitmap(HORIZONTAL_PADDING, 5, epd_bitmap_clock, 18, 18, White);
   ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("00:01") * 11) - HORIZONTAL_PADDING),6);
@@ -63,9 +67,38 @@ void render_ui(void) {
   ssd1306_DrawBitmap(HORIZONTAL_PADDING, 24 + VERTICAL_GAP, epd_bitmap_files, 18, 18, White);
   ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("67") * 11) - HORIZONTAL_PADDING),(24 + VERTICAL_GAP) + 1);
   ssd1306_WriteString("67", Font_11x18, White);
-  ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("Status: Idle") * 7) - HORIZONTAL_PADDING) / 2,(SSD1306_HEIGHT - 10));
-  ssd1306_WriteString("Status: Idle", Font_7x10, White);
-  ssd1306_DrawRectangle(HORIZONTAL_PADDING - 3, (2 + ((UISetting) * 23)), SSD1306_WIDTH - HORIZONTAL_PADDING, (2 + ((UISetting + 1) * 23)), White);
+  ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen(sys_state == SYS_IDLE ? "Status: Idle" : "Status: Running") * 7) - HORIZONTAL_PADDING) / 2,(SSD1306_HEIGHT - 10));
+  ssd1306_WriteString((sys_state == SYS_IDLE ? "Status: Idle" : "Status: Running"), Font_7x10, White);
+  if (sys_state == SYS_IDLE) {
+    ssd1306_DrawRectangle(HORIZONTAL_PADDING - 3, (2 + ((UISetting) * 23)), SSD1306_WIDTH - HORIZONTAL_PADDING, (2 + ((UISetting + 1) * 23)), White);
+    if (UIState == UI_STATE_EDITING) {
+      ssd1306_InvertRectangle(HORIZONTAL_PADDING - 3, (2 + ((UISetting) * 23)), SSD1306_WIDTH - HORIZONTAL_PADDING, (2 + ((UISetting + 1) * 23)));
+    }
+  }
   ssd1306_UpdateScreen();
 }
 
+void ui_state_machine_update(void) {
+  switch (UIState) {
+    case UI_STATE_NAVIGATING:
+      uint32_t current_encoder_value = TIM4->CNT/2;
+      if (current_encoder_value > last_encoder_value) {
+        if (UISetting < UI_SETTING_COUNT - 1) {
+          UISetting++;
+        } else {
+          UISetting = 0;
+        }
+      } else if (current_encoder_value < last_encoder_value) {
+        if (UISetting == 0) {
+          UISetting = UI_SETTING_COUNT - 1;
+        } else {
+          UISetting--;
+        }
+      }
+      last_encoder_value = current_encoder_value;
+      render_ui();
+    break;
+    case UI_STATE_EDITING:
+    break;
+  }
+}
