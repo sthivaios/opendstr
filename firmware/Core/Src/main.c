@@ -107,28 +107,23 @@ int main(void)
   MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
 
+  // init some stuff like timers and other peripherals
+  HAL_TIM_Base_Start_IT(&htim1);
+  __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_CC1);
+  __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_CC2);
+  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
+  splash_display();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_TIM_Base_Start_IT(&htim1);
-  __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_CC1);
-  __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_CC2);
-  uint32_t clock = HAL_RCC_GetSysClockFreq();
-  uint32_t psc = TIM1->PSC;
-  uint32_t arr = TIM1->ARR;
-  uint32_t val = RCC->CFGR & RCC_CFGR_SWS;
-  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
 
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-
-  MX_I2C1_Init();
-
-  splash_display();
-
-  // ReSharper disable once CppDFAEndlessLoop
+  // ReSharper disable once CppDFAEndlessLoop <-- another comment to disable CLion checks from being annoying, thanks JetBrains lol
   while (1)
   {
+
     sys_state_machine_update_state();
     sys_state_machine_take_action();
 
