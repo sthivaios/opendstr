@@ -3,7 +3,7 @@
 
 void display_shots(int shutter_fires, int total_shots);
 void display_splash_screen(void);
-void test_display(void);
+void render_ui(void);
 
 typedef enum {
   UI_SETTING_INTERVAL = 0,

@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
-const unsigned char epd_bitmap_clock [] = {
+static volatile UISetting_t UISetting = 1;
+
+static const unsigned char epd_bitmap_clock [] = {
   // 'clock-4, 18x18px
   0x00, 0x00, 0x00, 0x07, 0xf8, 0x00, 0x0f, 0x3c, 0x00, 0x18, 0x06, 0x00, 0x30, 0xc3, 0x00, 0x20,
   0xc1, 0x00, 0x60, 0xc1, 0x80, 0x40, 0xc0, 0x80, 0x40, 0xc0, 0x80, 0x43, 0xc0, 0x80, 0x47, 0x00,
@@ -13,7 +15,7 @@ const unsigned char epd_bitmap_clock [] = {
   0x07, 0xf8, 0x00, 0x00, 0x00, 0x00
 };
 
-const unsigned char epd_bitmap_files [] = {
+static const unsigned char epd_bitmap_files [] = {
   // 'files, 18x18px
   0x00, 0x00, 0x00, 0x01, 0xf8, 0x00, 0x03, 0x3c, 0x00, 0x03, 0x36, 0x00, 0x03, 0x33, 0x00, 0x33,
   0x1f, 0x00, 0x23, 0x1f, 0x80, 0x63, 0x01, 0x80, 0x63, 0x01, 0x80, 0x63, 0x01, 0x80, 0x63, 0x01,
@@ -49,7 +51,7 @@ void display_splash_screen(void) {
   ssd1306_UpdateScreen();
 }
 
-void test_display(void) {
+void render_ui(void) {
 #define HORIZONTAL_PADDING 8
 #define VERTICAL_GAP 4
 
@@ -58,11 +60,11 @@ void test_display(void) {
   ssd1306_DrawBitmap(HORIZONTAL_PADDING, 5, epd_bitmap_clock, 18, 18, White);
   ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("00:01") * 11) - HORIZONTAL_PADDING),6);
   ssd1306_WriteString("00:01", Font_11x18, White);
-  ssd1306_DrawRectangle(HORIZONTAL_PADDING - 3, 2, SSD1306_WIDTH - HORIZONTAL_PADDING, 25, White);
-  ssd1306_DrawBitmap(HORIZONTAL_PADDING, 25 + VERTICAL_GAP, epd_bitmap_files, 18, 18, White);
-  ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("67") * 11) - HORIZONTAL_PADDING),(25 + VERTICAL_GAP) + 1);
+  ssd1306_DrawBitmap(HORIZONTAL_PADDING, 24 + VERTICAL_GAP, epd_bitmap_files, 18, 18, White);
+  ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("67") * 11) - HORIZONTAL_PADDING),(24 + VERTICAL_GAP) + 1);
   ssd1306_WriteString("67", Font_11x18, White);
-  ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("Status: Idle") * 7) - HORIZONTAL_PADDING) / 2,(25 + VERTICAL_GAP + 13 + VERTICAL_GAP + 8));
+  ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("Status: Idle") * 7) - HORIZONTAL_PADDING) / 2,(SSD1306_HEIGHT - 10));
   ssd1306_WriteString("Status: Idle", Font_7x10, White);
+  ssd1306_DrawRectangle(HORIZONTAL_PADDING - 3, (2 + ((UISetting) * 23)), SSD1306_WIDTH - HORIZONTAL_PADDING, (2 + ((UISetting + 1) * 23)), White);
   ssd1306_UpdateScreen();
 }

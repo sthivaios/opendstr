@@ -115,7 +115,7 @@ int main(void)
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
   // display_splash_screen();
 
-  test_display();
+  render_ui();
 
 
   /* USER CODE END 2 */
