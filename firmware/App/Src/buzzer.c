@@ -1,7 +1,5 @@
 #include "../Inc/buzzer.h"
 
-#include <stdint.h>
-
 // flags for keeping track of time
 static volatile uint32_t ticks_at_start = 0;
 static volatile uint16_t beep_duration = 0;

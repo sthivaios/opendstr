@@ -2,6 +2,8 @@
 #define OPENDSTR_BUZZER_H
 
 #include "sys_state_machine.h"
+#include <stdint.h>
+#include "stm32f4xx_hal.h"
 
 // beep event: details that the buzzer_play_tone_for_duration() function accepts
 // so that it knows what tone to play
