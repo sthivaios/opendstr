@@ -30,8 +30,10 @@ uint32_t sys_get_ticks(void);
 void sys_request_shutter_to_fire(void);
 SystemState_t sys_get_state_machine_state(void);
 uint32_t sys_get_user_interval_between_shots(void);
+void sys_set_user_interval_between_shots(uint32_t interval);
 int sys_get_number_of_shots_to_take(void);
 void sys_set_number_of_shots_to_take(int number_of_shots);
 int sys_get_number_of_shots_fired(void);
+int16_t sys_get_time_remaining_until_shot(void);
 
 #endif //OPENDSTR_STATE_MACHINE_H

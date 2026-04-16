@@ -6,7 +6,7 @@ static volatile SystemState_t SystemState = SYS_IDLE;
 static volatile uint32_t ticks = 0;
 
 // interval between shutter fires
-static uint32_t user_interval = 1000;
+static uint32_t user_interval = 5000;
 // last request to change the state of the state machine - used for debugging
 // the button by checking how much time has passed
 static volatile uint32_t last_request_time = 0;
@@ -23,7 +23,8 @@ static volatile uint32_t last_button_press_time = 0;
 static volatile bool sys_button_is_being_held_down = false;
 // shots fired
 static volatile int shots_fired = 0;
-static volatile int number_of_shots_to_take = 0;
+static volatile int number_of_shots_to_take = 5;
+static volatile int16_t time_remaining_until_shot = 0;
 
 // predefined beep tones:
 
@@ -66,27 +67,24 @@ void sys_update_button_is_being_held_down(const bool state) {
   }
 }
 
-uint32_t sys_get_user_interval_between_shots(void) {
-  return user_interval;
+uint32_t sys_get_user_interval_between_shots(void) { return user_interval; }
+void sys_set_user_interval_between_shots(const uint32_t interval) {
+  user_interval = interval;
 }
-int sys_get_number_of_shots_to_take(void) {
-  return number_of_shots_to_take;
-}
-int sys_get_number_of_shots_fired(void) {
-  return shots_fired;
-}
+int sys_get_number_of_shots_to_take(void) { return number_of_shots_to_take; }
+int sys_get_number_of_shots_fired(void) { return shots_fired; }
 void sys_set_number_of_shots_to_take(const int number_of_shots) {
   number_of_shots_to_take = number_of_shots;
 }
-
+int16_t sys_get_time_remaining_until_shot(void) {
+  return time_remaining_until_shot;
+}
 
 // requests a shutter fire from the state machine by setting the
 // "shutter_request_flag" to true
 void sys_request_shutter_to_fire(void) { shutter_request_flag = true; }
 
-SystemState_t sys_get_state_machine_state(void) {
-  return SystemState;
-}
+SystemState_t sys_get_state_machine_state(void) { return SystemState; }
 
 // updates the variables and state of the state machine based on the current
 // state of variables and flags
@@ -134,7 +132,8 @@ void sys_state_machine_update_state(void) {
     break;
 
   case SYS_RUNNING:
-    // if the user_interval (interval between shutter fires) has passed, then fire the shutter by setting the flag
+    // if the user_interval (interval between shutter fires) has passed, then
+    // fire the shutter by setting the flag
     if ((ticks - last_fire_time) >= user_interval) {
       sys_update_last_fire_time();
       shutter_request_flag = true;
@@ -174,6 +173,8 @@ void sys_state_machine_update_state(void) {
     if (number_of_shots_to_take - shots_fired <= 0) {
       shutter_request_flag = false;
       shots_fired = 0;
+      buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
+                                      TIM8);
       SystemState = SYS_IDLE;
     }
     break;
@@ -183,7 +184,7 @@ void sys_state_machine_update_state(void) {
 void call_shutter_fire_and_clear_flags_and_beep(void) {
   shutter_request_flag = false;
   buzzer_play_tone_for_duration(Sys_State_Machine_Shutter_Fired_Beep, TIM8);
-  shutter_fire();
+  shutter_begin_fire();
 }
 
 void sys_state_machine_take_action(void) {
@@ -199,9 +200,16 @@ void sys_state_machine_take_action(void) {
       // increment shots_fired var
       shots_fired++;
     }
+    uint32_t time_elapsed_since_last_shot = ticks - last_fire_time;
+    if (user_interval > time_elapsed_since_last_shot) {
+      time_remaining_until_shot = user_interval - time_elapsed_since_last_shot;
+    } else {
+      time_remaining_until_shot = 0;
+    }
     break;
   }
   // used for buzzer timekeeping, if it's time to stop a beep, it will stop the
   // beep
   buzzer_check_and_end_beep(TIM8);
+  shutter_end_fire();
 }

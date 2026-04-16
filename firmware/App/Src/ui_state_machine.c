@@ -8,10 +8,10 @@
 #define ENCODER_SW_MINIMUM_PRESS_DURATION_MS 500
 #define ENCODER_SW_DEBOUNCING_DELAY_MS 1000
 
-static volatile UISetting_t UISetting = 1;
+static volatile UISetting_t UISetting = 0;
 static volatile UIState_t UIState = 0;
 
-static volatile uint32_t last_encoder_value = 0;
+static volatile uint16_t last_encoder_value = 0;
 
 static volatile uint32_t ticks = 0;
 static volatile uint32_t timestamp_when_encoder_sw_was_held_down = 0;
@@ -54,6 +54,14 @@ static const unsigned char epd_bitmap_files [] = {
 const BeepEvent_T Boot_Beep_1 = {.arr = 624, .psc = 249, .duty = 50, .duration = 200};
 const BeepEvent_T Boot_Beep_2 = {.arr = 646, .psc = 160, .duty = 50, .duration = 1000};
 
+void convert_milliseconds_to_hr_string(const uint32_t milliseconds, char* buffer) {
+  const int32_t total_seconds = milliseconds / 1000;
+  const int32_t minutes = total_seconds / 60;
+  const int32_t seconds = total_seconds % 60;
+
+  sprintf(buffer, "%02d:%02d", (int)minutes, (int)seconds);
+}
+
 void display_shots(const int shutter_fires, const int total_shots) {
   ssd1306_Fill(Black);
   ssd1306_SetCursor((SSD1306_WIDTH - ((strlen("OpenDSTR")) * 11)) / 2, 3);
@@ -88,8 +96,15 @@ void render_ui(void) {
 
   ssd1306_Fill(Black);
   ssd1306_DrawBitmap(HORIZONTAL_PADDING, 5, epd_bitmap_clock, 18, 18, White);
-  ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("00:01") * 11) - HORIZONTAL_PADDING),6);
-  ssd1306_WriteString("00:01", Font_11x18, White);
+  if (sys_state == SYS_RUNNING) {
+    convert_milliseconds_to_hr_string(sys_get_time_remaining_until_shot(), buffer);
+    ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen(buffer) * 11) - HORIZONTAL_PADDING),6);
+    ssd1306_WriteString(buffer, Font_11x18, White);
+  } else {
+    convert_milliseconds_to_hr_string(sys_get_user_interval_between_shots(), buffer);
+    ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen(buffer) * 11) - HORIZONTAL_PADDING),6);
+    ssd1306_WriteString(buffer, Font_11x18, White);
+  }
   ssd1306_DrawBitmap(HORIZONTAL_PADDING, 24 + VERTICAL_GAP, epd_bitmap_files, 18, 18, White);
   if (sys_state == SYS_RUNNING) {
     sprintf(buffer, "%d/%d", sys_get_number_of_shots_fired(), sys_get_number_of_shots_to_take());
@@ -110,37 +125,41 @@ void render_ui(void) {
 }
 
 void ui_state_machine_update(void) {
-  const uint32_t current_encoder_value = TIM4->CNT/2;
+  const uint16_t current_encoder_raw = TIM4->CNT;
 
-  switch (UIState) {
+  const int16_t raw_delta = (int16_t)(current_encoder_raw - last_encoder_value);
+  const int16_t delta = raw_delta / 2;
+
+  if (delta != 0) {
+    switch (UIState) {
     case UI_STATE_NAVIGATING:
-      if (current_encoder_value > last_encoder_value) {
+      if (delta > 0) {
         if (UISetting < UI_SETTING_COUNT - 1) {
           UISetting++;
         } else {
           UISetting = 0;
         }
-      } else if (current_encoder_value < last_encoder_value) {
+      } else if (delta < 0) {
         if (UISetting == 0) {
           UISetting = UI_SETTING_COUNT - 1;
         } else {
           UISetting--;
         }
       }
-      last_encoder_value = current_encoder_value;
-      render_ui();
-    break;
+      break;
+
     case UI_STATE_EDITING:
-    if (current_encoder_value - last_encoder_value != 0) {
-      const int32_t delta = current_encoder_value - last_encoder_value;
       if (UISetting == UI_SETTING_SHOT_COUNT) {
         sys_set_number_of_shots_to_take(sys_get_number_of_shots_to_take() + delta);
+      } else if (UISetting == UI_SETTING_INTERVAL) {
+        sys_set_user_interval_between_shots(sys_get_user_interval_between_shots() + (delta * 1000));
       }
+      break;
     }
-    last_encoder_value = current_encoder_value;
-    render_ui();
-    break;
+
+    last_encoder_value += (delta * 2);
   }
+
   ticks = sys_get_ticks();
   if (ticks - timestamp_when_last_encoder_sw_press_was_registered >= ENCODER_SW_DEBOUNCING_DELAY_MS) {
     if (encoder_sw_is_being_held_down && (ticks - timestamp_when_encoder_sw_was_held_down) >= ENCODER_SW_MINIMUM_PRESS_DURATION_MS) {
@@ -148,4 +167,6 @@ void ui_state_machine_update(void) {
       ui_state_machine_update_timestamp_when_encoder_sw_press_was_registered();
     }
   }
+
+  render_ui();
 }
