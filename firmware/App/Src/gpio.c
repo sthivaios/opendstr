@@ -12,8 +12,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     } else {
       sys_update_button_is_being_held_down(false);
     }
-  } else if (GPIO_Pin == MANUAL_SHUTTER_BTN_Pin) {
-    sys_request_shutter_to_fire();
   } else if (GPIO_Pin == ENCODER_SW_Pin) {
     if (((GPIOB->IDR >> 5) & 0x1) == 0) {
       if (!ui_state_machine_get_encoder_sw_is_being_held_down()) {
