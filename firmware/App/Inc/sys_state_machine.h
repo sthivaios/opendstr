@@ -32,5 +32,6 @@ SystemState_t sys_get_state_machine_state(void);
 uint32_t sys_get_user_interval_between_shots(void);
 int sys_get_number_of_shots_to_take(void);
 void sys_set_number_of_shots_to_take(int number_of_shots);
+int sys_get_number_of_shots_fired(void);
 
 #endif //OPENDSTR_STATE_MACHINE_H

@@ -6,7 +6,7 @@ static volatile SystemState_t SystemState = SYS_IDLE;
 static volatile uint32_t ticks = 0;
 
 // interval between shutter fires
-static uint32_t user_interval = 3000;
+static uint32_t user_interval = 1000;
 // last request to change the state of the state machine - used for debugging
 // the button by checking how much time has passed
 static volatile uint32_t last_request_time = 0;
@@ -71,6 +71,9 @@ uint32_t sys_get_user_interval_between_shots(void) {
 }
 int sys_get_number_of_shots_to_take(void) {
   return number_of_shots_to_take;
+}
+int sys_get_number_of_shots_fired(void) {
+  return shots_fired;
 }
 void sys_set_number_of_shots_to_take(const int number_of_shots) {
   number_of_shots_to_take = number_of_shots;
@@ -167,6 +170,11 @@ void sys_state_machine_update_state(void) {
         // set state machine state to SYS_IDLE
         SystemState = SYS_IDLE;
       }
+    }
+    if (number_of_shots_to_take - shots_fired <= 0) {
+      shutter_request_flag = false;
+      shots_fired = 0;
+      SystemState = SYS_IDLE;
     }
     break;
   }

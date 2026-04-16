@@ -91,7 +91,11 @@ void render_ui(void) {
   ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen("00:01") * 11) - HORIZONTAL_PADDING),6);
   ssd1306_WriteString("00:01", Font_11x18, White);
   ssd1306_DrawBitmap(HORIZONTAL_PADDING, 24 + VERTICAL_GAP, epd_bitmap_files, 18, 18, White);
-  sprintf(buffer, "%d", sys_get_number_of_shots_to_take());
+  if (sys_state == SYS_RUNNING) {
+    sprintf(buffer, "%d/%d", sys_get_number_of_shots_fired(), sys_get_number_of_shots_to_take());
+  } else {
+    sprintf(buffer, "%d", sys_get_number_of_shots_to_take());
+  }
   ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen(buffer) * 11) - HORIZONTAL_PADDING),(24 + VERTICAL_GAP) + 1);
   ssd1306_WriteString(buffer, Font_11x18, White);
   ssd1306_SetCursor((SSD1306_WIDTH - (int16_t)(strlen(sys_state == SYS_IDLE ? "Status: Idle" : "Status: Running") * 7) - HORIZONTAL_PADDING) / 2,(SSD1306_HEIGHT - 10));
