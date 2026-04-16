@@ -23,6 +23,7 @@ static volatile uint32_t last_button_press_time = 0;
 static volatile bool sys_button_is_being_held_down = false;
 // shots fired
 static volatile int shots_fired = 0;
+static volatile int number_of_shots_to_take = 0;
 
 // predefined beep tones:
 
@@ -64,6 +65,17 @@ void sys_update_button_is_being_held_down(const bool state) {
     sys_button_is_being_held_down = state;
   }
 }
+
+uint32_t sys_get_user_interval_between_shots(void) {
+  return user_interval;
+}
+int sys_get_number_of_shots_to_take(void) {
+  return number_of_shots_to_take;
+}
+void sys_set_number_of_shots_to_take(const int number_of_shots) {
+  number_of_shots_to_take = number_of_shots;
+}
+
 
 // requests a shutter fire from the state machine by setting the
 // "shutter_request_flag" to true

@@ -29,5 +29,8 @@ void sys_update_last_button_press_time(void);
 uint32_t sys_get_ticks(void);
 void sys_request_shutter_to_fire(void);
 SystemState_t sys_get_state_machine_state(void);
+uint32_t sys_get_user_interval_between_shots(void);
+int sys_get_number_of_shots_to_take(void);
+void sys_set_number_of_shots_to_take(int number_of_shots);
 
 #endif //OPENDSTR_STATE_MACHINE_H
