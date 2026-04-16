@@ -1,5 +1,6 @@
 #ifndef OPENDSTR_UI_STATE_MACHINE_H
 #define OPENDSTR_UI_STATE_MACHINE_H
+#include <stdbool.h>
 
 void display_shots(int shutter_fires, int total_shots);
 void display_splash_screen(void);
@@ -7,6 +8,11 @@ void render_ui(void);
 
 void ui_state_machine_update(void);
 void ui_state_machine_take_action(void);
+void ui_state_machine_toggle_state(void);
+void ui_state_machine_update_timestamp_when_encoder_sw_was_held_down(void);
+void ui_state_machine_set_encoder_sw_is_being_held_down(bool state);
+void ui_state_machine_update_timestamp_when_encoder_sw_press_was_registered(void);
+bool ui_state_machine_get_encoder_sw_is_being_held_down(void);
 
 typedef enum {
   UI_SETTING_INTERVAL = 0,

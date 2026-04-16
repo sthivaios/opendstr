@@ -5,10 +5,34 @@
 #include <stdio.h>
 #include <string.h>
 
+#define ENCODER_SW_MINIMUM_PRESS_DURATION_MS 500
+#define ENCODER_SW_DEBOUNCING_DELAY_MS 1000
+
 static volatile UISetting_t UISetting = 1;
 static volatile UIState_t UIState = 0;
 
 static volatile uint32_t last_encoder_value = 0;
+
+static volatile uint32_t ticks = 0;
+static volatile uint32_t timestamp_when_encoder_sw_was_held_down = 0;
+static volatile uint32_t timestamp_when_last_encoder_sw_press_was_registered = 0;
+static volatile bool encoder_sw_is_being_held_down = false;
+
+void ui_state_machine_toggle_state(void) {
+  UIState = UIState == UI_STATE_NAVIGATING ? UI_STATE_EDITING : UI_STATE_NAVIGATING;
+}
+void ui_state_machine_set_encoder_sw_is_being_held_down(const bool state) {
+  encoder_sw_is_being_held_down = state;
+}
+bool ui_state_machine_get_encoder_sw_is_being_held_down(void) {
+  return encoder_sw_is_being_held_down;
+}
+void ui_state_machine_update_timestamp_when_encoder_sw_was_held_down(void) {
+  timestamp_when_encoder_sw_was_held_down = sys_get_ticks();
+}
+void ui_state_machine_update_timestamp_when_encoder_sw_press_was_registered(void) {
+  timestamp_when_last_encoder_sw_press_was_registered = sys_get_ticks();
+}
 
 static const unsigned char epd_bitmap_clock [] = {
   // 'clock-4, 18x18px
@@ -100,5 +124,12 @@ void ui_state_machine_update(void) {
     break;
     case UI_STATE_EDITING:
     break;
+  }
+  ticks = sys_get_ticks();
+  if (ticks - timestamp_when_last_encoder_sw_press_was_registered >= ENCODER_SW_DEBOUNCING_DELAY_MS) {
+    if (encoder_sw_is_being_held_down && (ticks - timestamp_when_encoder_sw_was_held_down) >= ENCODER_SW_MINIMUM_PRESS_DURATION_MS) {
+      ui_state_machine_toggle_state();
+      ui_state_machine_update_timestamp_when_encoder_sw_press_was_registered();
+    }
   }
 }
