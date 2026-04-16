@@ -113,7 +113,7 @@ int main(void)
   __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_CC2);
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-  splash_display();
+  display_splash_screen();
 
   /* USER CODE END 2 */
 
