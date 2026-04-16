@@ -123,6 +123,7 @@ void ui_state_machine_update(void) {
       render_ui();
     break;
     case UI_STATE_EDITING:
+    render_ui();
     break;
   }
   ticks = sys_get_ticks();
