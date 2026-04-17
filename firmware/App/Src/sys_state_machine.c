@@ -264,8 +264,10 @@ void sys_state_machine_take_action(void) {
       if (ticks - timestamp_when_bulb_mode_started > bulb_mode_duration_ms) {
         bulb_mode_has_fired = false;
         shutter_open();
-        buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
+        if (!muted) {
+          buzzer_play_tone_for_duration(Sys_State_Machine_Enter_Idle_State_Beep,
                                         TIM8);
+        }
         SystemState = SYS_IDLE;
       }
     }
