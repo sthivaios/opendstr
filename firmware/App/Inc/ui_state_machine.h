@@ -23,6 +23,7 @@ typedef enum {
   UI_SETTING_INTERVAL = 0,
   UI_SETTING_SHOT_COUNT,
   UI_SETTING_MUTE,
+  UI_SETTING_ABOUT,
   UI_SETTING_COUNT  // handy for wrapping the selection
 } UISetting_t;
 
