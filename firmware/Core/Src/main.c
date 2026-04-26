@@ -49,7 +49,9 @@ TIM_HandleTypeDef htim8;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+// predefined beeps
+const BeepEvent_T Boot_Beep_1 = {.arr = 624, .psc = 249, .duty = 50, .duration = 200};
+const BeepEvent_T Boot_Beep_2 = {.arr = 646, .psc = 160, .duty = 50, .duration = 1000};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,10 +116,12 @@ int main(void)
   // display_splash_screen();
 
   display_splash_screen();
-  HAL_Delay(1500);
-  // ssd1306_Init();
+  display_single_shot_notice();
+  buzzer_plain_start_beep(Boot_Beep_1, TIM8);
+  HAL_Delay(1000);
+  buzzer_plain_stop_beep(TIM8);
+  HAL_Delay(2500);
   render_ui();
-
 
   /* USER CODE END 2 */
 

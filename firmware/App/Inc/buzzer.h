@@ -3,6 +3,7 @@
 
 #include "sys_state_machine.h"
 #include <stdint.h>
+#include <stdbool.h>
 #include "stm32f4xx_hal.h"
 
 // beep event: details that the buzzer_play_tone_for_duration() function accepts
@@ -16,5 +17,7 @@ typedef struct {
 
 void buzzer_play_tone_for_duration(BeepEvent_T beep_event, TIM_TypeDef *tim);
 void buzzer_check_and_end_beep(TIM_TypeDef *tim);
+void buzzer_plain_start_beep(BeepEvent_T beep_event, TIM_TypeDef *tim);
+void buzzer_plain_stop_beep(TIM_TypeDef *tim);
 
 #endif // OPENDSTR_BUZZER_H

@@ -78,6 +78,8 @@ uint32_t sys_get_user_interval_between_shots(void) { return user_interval; }
 void sys_set_user_interval_between_shots(const uint32_t interval) {
   user_interval = interval;
 }
+
+
 int sys_get_number_of_shots_to_take(void) { return number_of_shots_to_take; }
 int sys_get_number_of_shots_fired(void) { return shots_fired; }
 void sys_set_number_of_shots_to_take(const int number_of_shots) {

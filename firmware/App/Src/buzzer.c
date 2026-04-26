@@ -22,3 +22,13 @@ void buzzer_check_and_end_beep(TIM_TypeDef *tim) {
     tim->CCR1 = 0;
   }
 }
+
+void buzzer_plain_start_beep(const BeepEvent_T beep_event, TIM_TypeDef *tim) {
+  tim->ARR = beep_event.arr;
+  tim->PSC = beep_event.psc;
+  const int32_t calculated_ccr = (beep_event.duty * (beep_event.arr + 1)) / 100;
+  tim->CCR1 = calculated_ccr;
+}
+void buzzer_plain_stop_beep(TIM_TypeDef *tim) {
+    tim->CCR1 = 0;
+}

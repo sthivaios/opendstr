@@ -12,6 +12,7 @@
 #define SSD1306_INCLUDE_FONT_11x18
 #define SSD1306_INCLUDE_FONT_7x10
 #define SSD1306_INCLUDE_FONT_6x8
+#define SSD1306_INCLUDE_FONT_16x26
 
 // include main hal header
 #include "stm32f4xx_hal.h"
