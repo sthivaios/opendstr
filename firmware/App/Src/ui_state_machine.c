@@ -102,11 +102,11 @@ void display_splash_screen() {
 
 void display_bulb_notice(void) {
   ssd1306_Fill(White);
-  ssd1306_DrawBitmap((SSD1306_WIDTH - 24)/2, 1, epd_bitmap_info, 24, 24, Black);
-  ssd1306_SetCursor((SSD1306_WIDTH - strlen("In bulb mode,") * 7 )/2, 28);
-  ssd1306_WriteString("In bulb mode,", Font_7x10, Black);
-  ssd1306_SetCursor((SSD1306_WIDTH - strlen("make sure to use") * 7 )/2, 40);
-  ssd1306_WriteString("make sure to use", Font_7x10, Black);
+  ssd1306_DrawBitmap((SSD1306_WIDTH - 24)/2, 1, epd_bitmap_triangle_alert, 24, 24, Black);
+  ssd1306_SetCursor((SSD1306_WIDTH - strlen("ENTERING BULB MODE") * 7 )/2, 28);
+  ssd1306_WriteString("ENTERING BULB MODE", Font_7x10, Black);
+  ssd1306_SetCursor((SSD1306_WIDTH - strlen("Make sure to use") * 7 )/2, 40);
+  ssd1306_WriteString("Make sure to use", Font_7x10, Black);
   ssd1306_SetCursor((SSD1306_WIDTH - strlen("manual focus.") * 7 )/2, 52);
   ssd1306_WriteString("manual focus.", Font_7x10, Black);
   ssd1306_UpdateScreen();
